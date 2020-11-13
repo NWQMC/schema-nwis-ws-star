@@ -1,0 +1,14 @@
+databaseChangeLog:
+
+  - changeSet:
+      author: eorosz
+      id: "create.index.${NWIS_SCHEMA_NAME}.sitefile_agency_cd_site_no"
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+          - indexExists:
+              NWIS_SCHEMA_NAME: ${NWIS_SCHEMA_NAME}
+              indexName: sitefile_agency_cd_site_no
+      changes:
+        - sql: create unique index sitefile_agency_cd_site_no on ${NWIS_SCHEMA_NAME}.sitefile (agency_cd, site_no);
