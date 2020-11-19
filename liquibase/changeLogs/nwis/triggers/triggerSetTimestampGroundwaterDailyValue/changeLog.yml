@@ -10,7 +10,7 @@ databaseChangeLog:
       id: "create.trigger.${NWIS_SCHEMA_NAME}.set_timestamp_groundwater_daily_value"
       changes:
         - sqlFile:
-            path: triggerSetTimestampGroundwaterStatisticalDailyValue.sql
+            path: triggerSetTimestampGroundwaterDailyValue.sql
             relativeToChangelogFile: true
             splitStatements: false
         - rollback: drop trigger if exists set_timestamp_groundwater_daily_value on ${NWIS_SCHEMA_NAME}.groundwater_daily_value;
