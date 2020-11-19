@@ -10,7 +10,7 @@ databaseChangeLog:
       id: "create.trigger.${NWIS_SCHEMA_NAME}.set_timestamp_discrete_ground_water"
       changes:
         - sqlFile:
-            path: triggerSetTimestampDiscreteGroundWater.sql
+            path: triggerSetTimestampDiscreteGroundWaterAqts.sql
             relativeToChangelogFile: true
             splitStatements: false
-        - rollback: drop trigger if exists set_timestamp_discrete_ground_water on ${NWIS_SCHEMA_NAME}.discrete_ground_water;
+        - rollback: drop trigger if exists set_timestamp_discrete_ground_water_aqts on ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts;
