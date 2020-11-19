@@ -10,5 +10,5 @@ databaseChangeLog:
       relativeToChangelogFile: true
 
   - include:
-      file: "triggerSetTimestampDiscreteGroundWater/changeLog.yml"
+      file: "triggerSetTimestampDiscreteGroundWaterAqts/changeLog.yml"
       relativeToChangelogFile: true
