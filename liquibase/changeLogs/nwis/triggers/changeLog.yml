@@ -4,3 +4,11 @@ databaseChangeLog:
           type: postgresql
       - runningAs:
           username: ${NWIS_SCHEMA_OWNER_USERNAME}
+
+  - include:
+      file: "triggerSetTimestampGroudwaterDailyValue/changeLog.yml"
+      relativeToChangelogFile: true
+
+  - include:
+      file: "triggerSetTimestampDiscreteGroundWater/changeLog.yml"
+      relativeToChangelogFile: true
