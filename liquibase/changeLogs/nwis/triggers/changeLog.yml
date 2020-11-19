@@ -6,7 +6,7 @@ databaseChangeLog:
           username: ${NWIS_SCHEMA_OWNER_USERNAME}
 
   - include:
-      file: "triggerSetTimestampGroudwaterDailyValue/changeLog.yml"
+      file: "triggerSetTimestampGroundwaterDailyValue/changeLog.yml"
       relativeToChangelogFile: true
 
   - include:
