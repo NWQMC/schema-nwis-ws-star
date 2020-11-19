@@ -14,5 +14,5 @@ databaseChangeLog:
         relativeToChangelogFile: true
 
   - include:
-        file: "triggerSetTimestamp/changLog.yml"
+        file: "triggerSetTimestamp/changeLog.yml"
         relativeToChangelogFile: true
