@@ -36,3 +36,7 @@ databaseChangeLog:
   - include:
       file: "objectGrants/changeLog.yml"
       relativeToChangelogFile: true
+
+  - include:
+      file: "triggers/changeLog.yml"
+      relativeToChangelogFile: true

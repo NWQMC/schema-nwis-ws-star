@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - preConditions:
+      - dbms:
+          type: postgresql
+      - runningAs:
+          username: ${NWIS_SCHEMA_OWNER_USERNAME}
+
+  - changeSet:
+      author: ayan
+      id: "create.trigger.${NWIS_SCHEMA_NAME}.set_timestamp_discrete_ground_water"
+      changes:
+        - sqlFile:
+            path: triggerSetTimestampGroundwaterStatisticalDailyValue.sql
+            relativeToChangelogFile: true
+            splitStatements: false
+        - rollback: drop trigger if exists set_timestamp_discrete_ground_water on ${NWIS_SCHEMA_NAME}.discrete_ground_water;
