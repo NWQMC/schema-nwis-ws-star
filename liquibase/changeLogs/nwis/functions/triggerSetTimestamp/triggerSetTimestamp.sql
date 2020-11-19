@@ -1,4 +1,4 @@
-create or replace function ${AQTS_SCHEMA_NAME}.trigger_set_timestamp()
+create or replace function ${NWIS_SCHEMA_NAME}.trigger_set_timestamp()
 returns trigger as $$
 begin
   new.updated_at = NOW();
