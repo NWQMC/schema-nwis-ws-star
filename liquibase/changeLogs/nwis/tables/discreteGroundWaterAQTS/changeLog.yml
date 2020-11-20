@@ -162,6 +162,36 @@ databaseChangeLog:
       changes:
         - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts add column if not exists district_cd varchar(3);
 
+  - changeSet:
+      author: ayan
+      id: "alter.table.${NWIS_SCHEMA_NAME}.discrete_ground_water.add.created_at"
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - columnExists:
+                schemaName: ${NWIS_SCHEMA_NAME}
+                tableName: discrete_ground_water_aqts
+                columnName: created_at
+      changes:
+        - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts add column if not exists created_at timestamptz not null default now();
+        - rollback: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column created_at;
+
+  - changeSet:
+      author: ayan
+      id: "alter.table.${NWIS_SCHEMA_NAME}.discrete_ground_water.add.updated_at"
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - columnExists:
+                schemaName: ${NWIS_SCHEMA_NAME}
+                tableName: discrete_ground_water_aqts
+                columnName: updated_at
+      changes:
+        - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts add column if not exists updated_at timestamptz not null default now();
+        - rollback: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column updated_at;
+
   #
   # Rename approval code column to match name and data of AQTS (4 digit) instead of matching NWISWeb (1 char)
   # These columns are incompatible, so drop the column and re-add
@@ -223,3 +253,4 @@ databaseChangeLog:
       changes:
         - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts add column if not exists approval_level_description character varying (255);
         - rollback: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column approval_level_description;
+

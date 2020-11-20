@@ -36,4 +36,3 @@ databaseChangeLog:
           - expectedResult: "1"
       changes:
         - sql: alter table if exists ${NWIS_SCHEMA_NAME}.discrete_ground_water set logged
-
