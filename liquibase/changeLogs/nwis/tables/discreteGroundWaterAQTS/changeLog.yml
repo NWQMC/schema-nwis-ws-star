@@ -191,3 +191,66 @@ databaseChangeLog:
       changes:
         - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts add column if not exists updated_at timestamptz not null default now();
         - rollback: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column updated_at;
+
+  #
+  # Rename approval code column to match name and data of AQTS (4 digit) instead of matching NWISWeb (1 char)
+  # These columns are incompatible, so drop the column and re-add
+  - changeSet:
+      author: eeverman
+      id: "alter.table.${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts.drop.approval_status_code"
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - columnExists:
+            schemaName: ${NWIS_SCHEMA_NAME}
+            tableName: discrete_ground_water_aqts
+            columnName: approval_status_code
+      changes:
+        - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column if exists approval_status_code;
+        - rollback: alter table ${AQTS_SCHEMA_NAME}.discrete_ground_water_aqts add column approval_status_code character varying (1);
+  - changeSet:
+      author: eeverman
+      id: "alter.table.${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts.add.approval_level"
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - columnExists:
+                schemaName: ${NWIS_SCHEMA_NAME}
+                tableName: discrete_ground_water_aqts
+                columnName: approval_level
+      changes:
+        - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts add column if not exists approval_level character varying (10);
+        - rollback: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column approval_level;
+
+  #
+  # Rename approval description column to match name in AQTS instead of matching NWISWeb.
+  # Use drop + add instead of rename to make preconditions easier.
+  - changeSet:
+      author: eeverman
+      id: "alter.table.${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts.drop.approval_status"
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - columnExists:
+            schemaName: ${NWIS_SCHEMA_NAME}
+            tableName: discrete_ground_water_aqts
+            columnName: approval_status
+      changes:
+        - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column if exists approval_status;
+        - rollback: alter table ${AQTS_SCHEMA_NAME}.discrete_ground_water_aqts add column approval_status character varying (255);
+  - changeSet:
+      author: eeverman
+      id: "alter.table.${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts.add.approval_level_description"
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - columnExists:
+                schemaName: ${NWIS_SCHEMA_NAME}
+                tableName: discrete_ground_water_aqts
+                columnName: approval_level_description
+      changes:
+        - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts add column if not exists approval_level_description character varying (255);
+        - rollback: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column approval_level_description;
+
