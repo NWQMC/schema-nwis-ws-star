@@ -254,3 +254,33 @@ databaseChangeLog:
         - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts add column if not exists approval_level_description character varying (255);
         - rollback: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column approval_level_description;
 
+  #
+  # Remove the measurement_source_code & measurement_source columns.
+  # Measurement source is no longer a concept in AQTS, so doesn't belong in the obs database.
+  - changeSet:
+      author: eeverman
+      id: "alter.table.${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts.drop.measurement_source_code"
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - columnExists:
+            schemaName: ${NWIS_SCHEMA_NAME}
+            tableName: discrete_ground_water_aqts
+            columnName: measurement_source_code
+      changes:
+        - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column if exists measurement_source_code;
+        - rollback: alter table ${AQTS_SCHEMA_NAME}.discrete_ground_water_aqts add column measurement_source_code character varying (1);
+
+  - changeSet:
+      author: eeverman
+      id: "alter.table.${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts.drop.measurement_source"
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - columnExists:
+            schemaName: ${NWIS_SCHEMA_NAME}
+            tableName: discrete_ground_water_aqts
+            columnName: measurement_source
+      changes:
+        - sql: alter table ${NWIS_SCHEMA_NAME}.discrete_ground_water_aqts drop column if exists measurement_source;
+        - rollback: alter table ${AQTS_SCHEMA_NAME}.discrete_ground_water_aqts add column measurement_source character varying (255);
