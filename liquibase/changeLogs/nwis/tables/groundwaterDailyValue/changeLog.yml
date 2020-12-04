@@ -50,3 +50,19 @@ databaseChangeLog:
       changes:
         - sql: alter table ${NWIS_SCHEMA_NAME}.groundwater_daily_value add column if not exists updated_at timestamptz not null default now();
         - rollback: alter table ${NWIS_SCHEMA_NAME}.groundwater_daily_value drop column updated_at;
+
+  - changeSet:
+      author: ssoper
+      id: "alter.table.${NWIS_SCHEMA_NAME}.groundwater_daily_value.alter.column.groundwater_daily_value_id.type.bigint"
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - sqlCheck:
+          - sql: "SELECT count(*) FROM information_schema.columns
+            WHERE table_schema = '${NWIS_SCHEMA_NAME}'
+            and table_name = 'groundwater_daily_value'
+            and column_name = 'groundwater_daily_value_id'
+            and (data_type = 'int4' or data_type = 'smallint' or data_type = 'integer')"
+          - expectedResult: "1"
+      changes:
+        - sql: alter table ${NWIS_SCHEMA_NAME}.groundwater_daily_value alter column groundwater_daily_value_id type bigint;
