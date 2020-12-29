@@ -20,12 +20,12 @@ pipeline {
     stage('Git Clone') {
       steps {
         checkout([
-            $class: 'GitSCM', 
-            branches: [[name: '*/master']], 
-            doGenerateSubmoduleConfigurations: false, 
-            extensions: [], 
-            submoduleCfg: [], 
-            userRemoteConfigs: [[credentialsId: 'CIDA-Jenkins-GitHub', 
+            $class: 'GitSCM',
+            branches: [[name: '*/master']],
+            doGenerateSubmoduleConfigurations: false,
+            extensions: [],
+            submoduleCfg: [],
+            userRemoteConfigs: [[credentialsId: 'CIDA-Jenkins-GitHub',
             url: 'https://github.com/NWQMC/schema-nwis-ws-star.git']]])
       }
     }
@@ -41,7 +41,24 @@ pipeline {
     stage('Run liquibase') {
       steps {
         script {
+          def mappedStage = ""
+          def deployStage = '$DEPLOY_STAGE'
+          switch(deployStage) {
+            case "PROD-EXTERNAL":
+              mappedStage = "legacy-production-external"
+              break
+            case "QA":
+              mappedStage = "legacy-qa"
+              break
+            case "TEST":
+              mappedStage = "legacy-test"
+              break
+            default:
+              mappedStage = "development"
+          }
+          def dbAdminSecret = sh(script: '/usr/local/bin/aws secretsmanager get-secret-value --name "/observations-db-$mappedStage/$mappedStage/rds-admin-password" --region "us-west-2"', returnStdout: true).trim()
           def secretsString = sh(script: '/usr/local/bin/aws ssm get-parameter --name "/aws/reference/secretsmanager/WQP-EXTERNAL-$DEPLOY_STAGE" --query "Parameter.Value" --with-decryption --output text --region "us-west-2"', returnStdout: true).trim()
+          def dbAdminSecretJson = readJSON test: dbAdminSecret
           def secretsJson =  readJSON text: secretsString
           env.NWIS_DATABASE_ADDRESS = secretsJson.DATABASE_ADDRESS
           env.NWIS_DATABASE_NAME = secretsJson.DATABASE_NAME
@@ -55,11 +72,11 @@ pipeline {
           env.WDFN_DB_READ_ONLY_USERNAME = secretsJson.WDFN_DB_READ_ONLY_USERNAME
           env.WQP_SCHEMA_OWNER_USERNAME = secretsJson.WQP_SCHEMA_OWNER_USERNAME
           env.WQP_SCHEMA_OWNER_PASSWORD = secretsJson.WQP_SCHEMA_OWNER_PASSWORD
-          env.POSTGRES_PASSWORD = secretsJson.POSTGRES_PASSWORD
+          env.POSTGRES_PASSWORD = dbAdminSecretJson.SecretString
           env.OBSERVATION_SCHEMA_NAME = secretsJson.OBSERVATION_SCHEMA_NAME
-          
+
           sh '''
-           
+
             export CONTEXTS=$CONTEXTS
             export LIQUIBASE_HOME=$WORKSPACE/nwis
             export LIQUIBASE_WORKSPACE_NWIS=$WORKSPACE/liquibase/changeLogs
