@@ -42,7 +42,8 @@ pipeline {
       steps {
         script {
           def mappedStage = ""
-          def deployStage = '$DEPLOY_STAGE'
+          def deployStage = "$DEPLOY_STAGE"
+          println(deployStage)
           switch(deployStage) {
             case "PROD-EXTERNAL":
               mappedStage = "legacy-production-external"
@@ -56,9 +57,10 @@ pipeline {
             default:
               mappedStage = "development"
           }
-          def dbAdminSecret = sh(script: '/usr/local/bin/aws secretsmanager get-secret-value --name "/observations-db-$mappedStage/$mappedStage/rds-admin-password" --region "us-west-2"', returnStdout: true).trim()
+          env.MAPPED_STAGE = mappedStage
+          def dbAdminSecret = sh(script: '/usr/local/bin/aws secretsmanager get-secret-value --secret-id "/observations-db-$MAPPED_STAGE/$MAPPED_STAGE/rds-admin-password" --region "us-west-2"', returnStdout: true).trim()
           def secretsString = sh(script: '/usr/local/bin/aws ssm get-parameter --name "/aws/reference/secretsmanager/WQP-EXTERNAL-$DEPLOY_STAGE" --query "Parameter.Value" --with-decryption --output text --region "us-west-2"', returnStdout: true).trim()
-          def dbAdminSecretJson = readJSON test: dbAdminSecret
+          def dbAdminSecretJson = readJSON text: dbAdminSecret
           def secretsJson =  readJSON text: secretsString
           env.NWIS_DATABASE_ADDRESS = secretsJson.DATABASE_ADDRESS
           env.NWIS_DATABASE_NAME = secretsJson.DATABASE_NAME
