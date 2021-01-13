@@ -43,25 +43,20 @@ pipeline {
         script {
           def mappedStage = ""
           def deployStage = "$DEPLOY_STAGE"
-          println(deployStage)
+          def secretsString = sh(script: '/usr/local/bin/aws ssm get-parameter --name "/aws/reference/secretsmanager/WQP-EXTERNAL-$DEPLOY_STAGE" --query "Parameter.Value" --with-decryption --output text --region "us-west-2"', returnStdout: true).trim()
+          def secretsJson =  readJSON text: secretsString
           switch(deployStage) {
             case "PROD-EXTERNAL":
               mappedStage = "legacy-production-external"
-              break
-            case "QA":
-              mappedStage = "legacy-qa"
-              break
-            case "TEST":
-              mappedStage = "legacy-test"
+              def dbAdminSecret = sh(script: '/usr/local/bin/aws secretsmanager get-secret-value --secret-id "/observations-db-$MAPPED_STAGE/$MAPPED_STAGE/rds-admin-password" --region "us-west-2"', returnStdout: true).trim()
+              def dbAdminSecretJson = readJSON text: dbAdminSecret
+              env.POSTGRES_PASSWORD = dbAdminSecretJson.SecretString
               break
             default:
-              mappedStage = "development"
+              mappedStage = "$DEPLOY_STAGE"
+              env.POSTGRES_PASSWORD = secretsJson.POSTGRES_PASSWORD
           }
           env.MAPPED_STAGE = mappedStage
-          def dbAdminSecret = sh(script: '/usr/local/bin/aws secretsmanager get-secret-value --secret-id "/observations-db-$MAPPED_STAGE/$MAPPED_STAGE/rds-admin-password" --region "us-west-2"', returnStdout: true).trim()
-          def secretsString = sh(script: '/usr/local/bin/aws ssm get-parameter --name "/aws/reference/secretsmanager/WQP-EXTERNAL-$DEPLOY_STAGE" --query "Parameter.Value" --with-decryption --output text --region "us-west-2"', returnStdout: true).trim()
-          def dbAdminSecretJson = readJSON text: dbAdminSecret
-          def secretsJson =  readJSON text: secretsString
           env.NWIS_DATABASE_ADDRESS = secretsJson.DATABASE_ADDRESS
           env.NWIS_DATABASE_NAME = secretsJson.DATABASE_NAME
           env.NWIS_DB_OWNER_USERNAME = secretsJson.DB_OWNER_USERNAME
@@ -74,7 +69,6 @@ pipeline {
           env.WDFN_DB_READ_ONLY_USERNAME = secretsJson.WDFN_DB_READ_ONLY_USERNAME
           env.WQP_SCHEMA_OWNER_USERNAME = secretsJson.WQP_SCHEMA_OWNER_USERNAME
           env.WQP_SCHEMA_OWNER_PASSWORD = secretsJson.WQP_SCHEMA_OWNER_PASSWORD
-          env.POSTGRES_PASSWORD = dbAdminSecretJson.SecretString
           env.OBSERVATION_SCHEMA_NAME = secretsJson.OBSERVATION_SCHEMA_NAME
 
           sh '''
