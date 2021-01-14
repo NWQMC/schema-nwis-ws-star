@@ -48,6 +48,7 @@ pipeline {
           switch(deployStage) {
             case "PROD-EXTERNAL":
               mappedStage = "legacy-production-external"
+              env.MAPPED_STAGE = mappedStage
               def dbAdminSecret = sh(script: '/usr/local/bin/aws secretsmanager get-secret-value --secret-id "/observations-db-$MAPPED_STAGE/$MAPPED_STAGE/rds-admin-password" --region "us-west-2"', returnStdout: true).trim()
               def dbAdminSecretJson = readJSON text: dbAdminSecret
               env.POSTGRES_PASSWORD = dbAdminSecretJson.SecretString
@@ -56,7 +57,6 @@ pipeline {
               mappedStage = "$DEPLOY_STAGE"
               env.POSTGRES_PASSWORD = secretsJson.POSTGRES_PASSWORD
           }
-          env.MAPPED_STAGE = mappedStage
           env.NWIS_DATABASE_ADDRESS = secretsJson.DATABASE_ADDRESS
           env.NWIS_DATABASE_NAME = secretsJson.DATABASE_NAME
           env.NWIS_DB_OWNER_USERNAME = secretsJson.DB_OWNER_USERNAME
